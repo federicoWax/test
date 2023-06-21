@@ -6,10 +6,10 @@ const App = () => {
   const [moveableComponents, setMoveableComponents] = useState([]);
   const [selected, setSelected] = useState(null);
   const { loading, response: resImages } = useGet("https://jsonplaceholder.typicode.com/photos");
-  const [indexImage, setIndexImage] = useState(0);
 
   const addMoveable = async () => {
     if (loading || !resImages?.length) return;
+
     const COLORS = ["red", "blue", "yellow", "green", "purple"];
 
     setMoveableComponents([
@@ -22,40 +22,19 @@ const App = () => {
         height: 100,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         updateEnd: true,
-        url: resImages[indexImage].url
+        url: resImages[moveableComponents.length].url
       },
     ]);
-    setIndexImage(i => i + 1);
   };
 
   const updateMoveable = (id, newComponent, updateEnd = false) => {
-    const updatedMoveables = moveableComponents.map((moveable, i) => {
+    const updatedMoveables = moveableComponents.map((moveable) => {
       if (moveable.id === id) {
         return { id, ...newComponent, updateEnd };
       }
       return moveable;
     });
     setMoveableComponents(updatedMoveables);
-  };
-
-  const handleResizeStart = (index, e) => {
-    console.log("e", e.direction);
-    // Check if the resize is coming from the left handle
-    const [handlePosX, handlePosY] = e.direction;
-    // 0 => center
-    // -1 => top or left
-    // 1 => bottom or right
-
-    // -1, -1
-    // -1, 0
-    // -1, 1
-    if (handlePosX === -1) {
-      console.log("width", moveableComponents, e);
-      // Save the initial left and width values of the moveable component
-      const initialLeft = e.left;
-      const initialWidth = e.width;
-      // Set up the onResize event handler to update the left value based on the change in width
-    }
   };
 
   return (
@@ -75,7 +54,6 @@ const App = () => {
             {...item}
             key={index}
             updateMoveable={updateMoveable}
-            handleResizeStart={handleResizeStart}
             setSelected={setSelected}
             isSelected={selected === item.id}
             handleDelete={(id) => setMoveableComponents(mc => mc.filter(m => m.id !== id))}
@@ -162,28 +140,25 @@ const Component = ({
 
   return (
     <>
-      <div>
+      <div
+        style={{
+          position: "relative",
+          top,
+          left,
+          width,
+          height,
+        }}
+        ref={ref}
+        onClick={() => setSelected(id)}
+      >
         <img
-          ref={ref}
-          className="draggable"
-          id={"component-" + id}
-          style={{
-            position: "absolute",
-            top,
-            left,
-            width,
-            height,
-          }}
-          onClick={() => setSelected(id)}
           alt={"img" + id}
           src={url}
-          
+          style={{ position: "absolute", height: "100%", width: "100%" }}
         />
         <button
           style={{
-            position: 'absolute',
-            top,
-            left,
+            position: "absolute",
             width: '30px',
             height: '30px',
             borderRadius: '50%',
